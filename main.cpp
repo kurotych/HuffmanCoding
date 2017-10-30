@@ -7,6 +7,8 @@
 class Element
 {
 public:
+    Element(int freq) : frequency(freq){}
+    int frequency;
     virtual bool isLeaf() = 0;
     virtual ~Element(){}
 };
@@ -14,19 +16,15 @@ public:
 class Leaf : public Element
 {
 public:
-    Leaf(char _symbol) : symbol(_symbol),
-        frequency(1){ }
+    Leaf(char _symbol) : Element(1), symbol(_symbol){}
     char symbol;
-    int frequency;
     bool isLeaf() override { return true; }
 };
 
 class Node : public Element
 {
 public:
-    Node():frequency(0), left(nullptr),
-        right(nullptr){}
-    int frequency;
+    Node(): Element(0), left(nullptr), right(nullptr){}
     Element * left;
     Element * right;
     bool isLeaf() override { return false; }
@@ -55,7 +53,7 @@ create_queue(const std::string& s)
     }
 
     auto comp = [] (const Element *a, const Element *b)
-    { return ((const Leaf *)a)->frequency > ((const Leaf *)b)->frequency; };
+    { return a->frequency > b->frequency; };
 
     using queue_t = std::priority_queue<Element*, std::vector<Element*>, decltype(comp)>;
 
