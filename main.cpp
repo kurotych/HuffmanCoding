@@ -25,11 +25,10 @@ public:
 class Node : public Element
 {
 public:
-    Node(const Element* a ,const Element* b)
+    Node(Element* a, Element* b)
         :Element(a->frequency + b->frequency), left(a), right(b){}
-    Node(): Element(0), left(nullptr), right(nullptr){}
-    const Element * left;
-    const Element * right;
+    Element * left;
+    Element * right;
     bool isLeaf() override { return false; }
 };
 
@@ -60,17 +59,7 @@ create_queue(const std::string& s)
 
     using queue_t = std::priority_queue<Element*, std::vector<Element*>, decltype(comp)>;
 
-    auto delEl = [](queue_t * q)
-    {
-        while(!q->empty())
-        {
-            delete q->top();
-            q->pop();
-        }
-        delete q;
-    };
-
-    std::unique_ptr<queue_t, decltype(delEl)> ptr(new queue_t(comp, v), delEl);
+    std::unique_ptr<queue_t> ptr(new queue_t(comp, v));
     return ptr;
 }
 
@@ -87,10 +76,21 @@ void build_tree(T& queue_ptr)
     }
 }
 
+void free_tree(Element *n)
+{
+    if(!n->isLeaf())
+    {
+        free_tree(((Node*)n)->left);
+        free_tree(((Node*)n)->right);
+    }
+    delete n;
+}
+
 int main()
 {
     auto q = create_queue("abacabad");
     build_tree(q);
+    free_tree(q->top());
 
 //    while(!q->empty())
 //    {
