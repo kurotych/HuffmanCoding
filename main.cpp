@@ -3,11 +3,12 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <list>
 
 class Element
 {
 public:
-    Element(int freq) : frequency(freq){}
+    Element(int freq): frequency(freq){}
     int frequency;
     virtual bool isLeaf() = 0;
     virtual ~Element(){}
@@ -16,7 +17,7 @@ public:
 class Leaf : public Element
 {
 public:
-    Leaf(char _symbol) : Element(1), symbol(_symbol){}
+    Leaf(char _symbol): Element(1), symbol(_symbol){}
     char symbol;
     bool isLeaf() override { return true; }
 };
@@ -24,9 +25,11 @@ public:
 class Node : public Element
 {
 public:
+    Node(const Element* a ,const Element* b)
+        :Element(a->frequency + b->frequency), left(a), right(b){}
     Node(): Element(0), left(nullptr), right(nullptr){}
-    Element * left;
-    Element * right;
+    const Element * left;
+    const Element * right;
     bool isLeaf() override { return false; }
 };
 
@@ -72,10 +75,22 @@ create_queue(const std::string& s)
 }
 
 
+template<typename T> // T == queue_t
+void build_tree(T& queue_ptr)
+{
+    while (queue_ptr->size() != 1) {
+        Element * a = queue_ptr->top();
+        queue_ptr->pop();
+        Element * b = queue_ptr->top();
+        queue_ptr->pop();
+        queue_ptr->push(new Node(a,b));
+    }
+}
 
 int main()
 {
     auto q = create_queue("abacabad");
+    build_tree(q);
 
 //    while(!q->empty())
 //    {
