@@ -97,8 +97,6 @@ void free_tree(Element *n, std::map<char, std::string>& out, std::string s = "")
     }
     else
         s.pop_back();
-
-   // delete n;
 }
 
 std::string encrypt(const char *str, const std::map<char, std::string>& codes)
@@ -113,7 +111,7 @@ std::string encrypt(const char *str, const std::map<char, std::string>& codes)
 
 int main()
 {
-    const char* input_str = "weiruwqehdsfdsferqew";
+    const char* input_str = "abacabad";
     auto q = create_queue(input_str);
 
     std::map<char, std::string> codes;
