@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <list>
+#include <map>
 
 class Element
 {
@@ -76,27 +77,44 @@ void build_tree(T& queue_ptr)
     }
 }
 
-void free_tree(Element *n)
+void free_tree(Element *n, std::map<char, std::string>& out)
 {
+    static std::string s;
     if(!n->isLeaf())
     {
-        free_tree(((Node*)n)->left);
-        free_tree(((Node*)n)->right);
+        s.push_back('0');
+        free_tree(((Node*)n)->left, out);
+        s.pop_back();
+        s.push_back('1');
+        free_tree(((Node*)n)->right, out);
+    }
+    else
+    {
+        if(s.empty())
+            s = "0";
+        out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
+        std::cout << ((Leaf*)n)->symbol << ": " << s << std::endl;
     }
     delete n;
 }
 
+std::string encrypt(const char *str, const std::map<char, std::string>& codes)
+{
+    std::string out_string;
+    do {
+        out_string += codes.at(*str);
+    } while (*(++str));
+    return out_string;
+}
 int main()
 {
-    auto q = create_queue("abacabad");
-    build_tree(q);
-    free_tree(q->top());
+    const char* input_str = "abacabad";
+    auto q = create_queue(input_str);
 
-//    while(!q->empty())
-//    {
-//        std::cout << ((Leaf*)q->top())->symbol << " " << ((Leaf*)q->top())->frequency << std::endl;
-//        q->pop();
-//    }
+    std::map<char, std::string> codes;
+    build_tree(q);
+    free_tree(q->top(), codes);
+    std::cout << encrypt(input_str, codes);
 
     return 0;
 }
