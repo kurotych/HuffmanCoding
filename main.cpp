@@ -18,6 +18,8 @@ public:
 class Leaf : public Element
 {
 public:
+    Element * left = nullptr;
+    Element * right = nullptr;
     Leaf(char _symbol): Element(1), symbol(_symbol){}
     char symbol;
     bool isLeaf() override { return true; }
@@ -33,7 +35,13 @@ public:
     bool isLeaf() override { return false; }
 };
 
-decltype(auto)
+bool comp (const Element *a, const Element *b)
+{ return a->frequency > b->frequency; };
+
+bool (*comp_ptr) (const Element*,const Element*) = comp;
+using queue_t = std::priority_queue<Element*, std::vector<Element*>, decltype(comp_ptr)>;
+
+std::unique_ptr<queue_t>
 create_queue(const std::string& s)
 {
     std::vector<Element*> v;
@@ -55,12 +63,7 @@ create_queue(const std::string& s)
         }
     }
 
-    auto comp = [] (const Element *a, const Element *b)
-    { return a->frequency > b->frequency; };
-
-    using queue_t = std::priority_queue<Element*, std::vector<Element*>, decltype(comp)>;
-
-    std::unique_ptr<queue_t> ptr(new queue_t(comp, v));
+    std::unique_ptr<queue_t> ptr(new queue_t(comp_ptr, v));
     return ptr;
 }
 
@@ -77,23 +80,31 @@ void build_tree(T& queue_ptr)
     }
 }
 
-void free_tree(Element *n, std::map<char, std::string>& out)
+void free_tree(Element *n, std::map<char, std::string>& out, std::string s)
 {
-    static std::string s;
-    if(!n->isLeaf())
+    if(n)
     {
+        if(n->isLeaf())
+        {
+            if(s.empty())
+                s = "0";
+            out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
+            return;
+        }
+
         s.push_back('0');
-        free_tree(((Node*)n)->left, out);
+        free_tree(((Node*)n)->left, out,s);
         s.pop_back();
         s.push_back('1');
-        free_tree(((Node*)n)->right, out);
+        free_tree(((Node*)n)->right, out,s);
     }
     else
     {
-        if(s.empty())
-            s = "0";
-        out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
-        std::cout << ((Leaf*)n)->symbol << ": " << s << std::endl;
+        s.pop_back();
+       // if(s.empty())
+        //    s = "0";
+       // out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
+
     }
     delete n;
 }
@@ -108,13 +119,20 @@ std::string encrypt(const char *str, const std::map<char, std::string>& codes)
 }
 int main()
 {
-    const char* input_str = "abacabad";
+    char input_str[10000];
+    std::cin >> input_str;
     auto q = create_queue(input_str);
-
+    size_t s = q->size();
     std::map<char, std::string> codes;
     build_tree(q);
-    free_tree(q->top(), codes);
-    std::cout << encrypt(input_str, codes);
 
+    free_tree(q->top(), codes, "");
+
+    std::string result =  encrypt(input_str, codes);
+    std::cout << s << " " << result.size() << std::endl;
+    for(auto& s : codes)
+        std::cout << s.first << ": " << s.second << std::endl;
+
+    std::cout << result;
     return 0;
 }
