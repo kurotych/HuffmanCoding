@@ -89,6 +89,7 @@ void free_tree(Element *n, std::map<char, std::string>& out, std::string s)
             if(s.empty())
                 s = "0";
             out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
+            delete n;
             return;
         }
 
@@ -99,13 +100,8 @@ void free_tree(Element *n, std::map<char, std::string>& out, std::string s)
         free_tree(((Node*)n)->right, out,s);
     }
     else
-    {
         s.pop_back();
-       // if(s.empty())
-        //    s = "0";
-       // out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
 
-    }
     delete n;
 }
 
@@ -119,8 +115,8 @@ std::string encrypt(const char *str, const std::map<char, std::string>& codes)
 }
 int main()
 {
-    char input_str[10000];
-    std::cin >> input_str;
+    char input_str[10000] = "weiruwqehdsfdsferqew";
+  //  std::cin >> input_str;
     auto q = create_queue(input_str);
     size_t s = q->size();
     std::map<char, std::string> codes;
