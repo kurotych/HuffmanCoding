@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <list>
 #include <map>
 
 class Element
@@ -77,25 +76,29 @@ void build_tree(T& queue_ptr)
     }
 }
 
-void free_tree(Element *n, std::map<char, std::string>& out)
+void free_tree(Element *n, std::map<char, std::string>& out, std::string s = "")
 {
-    static std::string s;
-    if(!n->isLeaf())
+    if(n)
     {
+        if(n->isLeaf())
+        {
+            if(s.empty())
+                s = "0";
+            out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
+            delete n;
+            return;
+        }
         s.push_back('0');
-        free_tree(((Node*)n)->left, out);
+        free_tree(((Node*)n)->left, out, s);
         s.pop_back();
         s.push_back('1');
-        free_tree(((Node*)n)->right, out);
+        free_tree(((Node*)n)->right, out, s);
+        delete n;
     }
     else
-    {
-        if(s.empty())
-            s = "0";
-        out.insert(std::pair<char,std::string>( ((Leaf*)n)->symbol, s));
-        std::cout << ((Leaf*)n)->symbol << ": " << s << std::endl;
-    }
-    delete n;
+        s.pop_back();
+
+   // delete n;
 }
 
 std::string encrypt(const char *str, const std::map<char, std::string>& codes)
@@ -106,14 +109,17 @@ std::string encrypt(const char *str, const std::map<char, std::string>& codes)
     } while (*(++str));
     return out_string;
 }
+
+
 int main()
 {
-    const char* input_str = "abacabad";
+    const char* input_str = "weiruwqehdsfdsferqew";
     auto q = create_queue(input_str);
 
     std::map<char, std::string> codes;
     build_tree(q);
     free_tree(q->top(), codes);
+
     std::cout << encrypt(input_str, codes);
 
     return 0;
