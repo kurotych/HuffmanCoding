@@ -99,15 +99,36 @@ void free_tree(Element *n, std::map<char, std::string>& out, std::string s = "")
         s.pop_back();
 }
 
-std::string encrypt(const char *str, const std::map<char, std::string>& codes)
+std::string encrypt(const char *str, const std::map<char, std::string>& dict)
 {
     std::string out_string;
     do {
-        out_string += codes.at(*str);
+        out_string += dict.at(*str);
     } while (*(++str));
     return out_string;
 }
 
+std::string decrypt(std::string input_str, const std::map<char, std::string>& dict)
+{
+    std::string result_str;
+
+    while(!input_str.empty())
+    {
+        for(auto& d : dict)
+        {
+            if( d.second.length() <= input_str.length() )
+            {
+                if(input_str.substr(0, d.second.length()) == d.second )
+                {
+                    result_str += d.first;
+                    input_str = std::move(input_str.substr(d.second.length()));
+                }
+            }
+        }
+    }
+
+    return result_str;
+}
 
 int main()
 {
@@ -118,7 +139,11 @@ int main()
     build_tree(q);
     free_tree(q->top(), codes);
 
-    std::cout << encrypt(input_str, codes);
+    std::string encStr = encrypt(input_str, codes);
+
+    std::cout << "Encrypt str: " << encStr << std::endl;
+
+    std::cout << "Decrypt str: " << decrypt(std::move(encStr), codes);
 
     return 0;
 }
