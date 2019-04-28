@@ -10,7 +10,7 @@ class Element
 public:
     Element(int freq): frequency(freq){}
     int frequency;
-    virtual bool isLeaf() = 0;
+    virtual bool isLeaf() const = 0;
     virtual ~Element(){}
 };
 
@@ -19,7 +19,7 @@ class Leaf : public Element
 public:
     Leaf(char _symbol): Element(1), symbol(_symbol){}
     char symbol;
-    bool isLeaf() override { return true; }
+    bool isLeaf() const override { return true; }
 };
 
 class Node : public Element
@@ -29,7 +29,7 @@ public:
         :Element(a->frequency + b->frequency), left(a), right(b){}
     Element * left;
     Element * right;
-    bool isLeaf() override { return false; }
+    bool isLeaf() const override { return false; }
 };
 
 decltype(auto)
@@ -139,7 +139,7 @@ int main()
     build_tree(q);
     free_tree(q->top(), codes);
 
-    std::string encStr = encrypt(input_str, codes);
+    std::string encStr = encrypt(std::move(input_str), codes);
 
     std::cout << "Encrypt str: " << encStr << std::endl;
 
